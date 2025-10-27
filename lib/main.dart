@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unit7_pizzalist/pizza.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,9 +30,65 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  List<Pizza> pizzaInOrder = [];
+
+  void initState(){
+    super.initState();
+    pizzaInOrder.add(Pizza("Pepperoni", 2));
+    pizzaInOrder.add(Pizza("Pinneaple ", 3));
+
+  }
+
   void _addPizza() {
     // TODO: display add pizza Dialog window
-    print("addPizza called");
+    TextEditingController _toppingController = TextEditingController();
+    int tempSizeIndex = 0;
+    showDialog<void>(
+
+
+      context: context,
+      // The inner content is self-contained and manages the Slider's state
+      builder: (BuildContext dialogContext) {
+
+        return AlertDialog(
+          title: const Text('Build Your Pizza'),
+          content: StatefulBuilder( // Use StatefulBuilder to manage the Slider's state
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                children: [
+                  TextField(controller: _toppingController, ),
+                  Slider(
+                    value: tempSizeIndex.toDouble(),
+                    min: 0,
+                    max: (PIZZA_SIZES.length - 1).toDouble(),
+                    divisions: PIZZA_SIZES.length - 1,
+                    onChanged: (double newValue) {
+                      setState(() { // This rebuilds only the AlertDialog's content
+                        tempSizeIndex = newValue.round();
+                      });
+                    },
+                  ),
+
+                ]
+              );
+            },
+          ),
+          actions: [
+            // put button widgets here
+            ElevatedButton(
+              onPressed:() {
+
+                setState(() {
+                  pizzaInOrder.add(Pizza(_toppingController.text, tempSizeIndex));
+                });
+                Navigator.pop(context);
+              },
+              child: Text('Add Pizza'),
+            )
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -40,7 +97,13 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Text("Display List of Pizza objects here"),
+      body: ListView.builder(itemCount:pizzaInOrder.length, itemBuilder: (BuildContext context, int index) {
+
+        return Card(child: ListTile(
+            title: Text(pizzaInOrder[index].description),
+            subtitle: Text("Price: ${pizzaInOrder[index].price.toString()}")
+        ));
+      }),
       floatingActionButton: FloatingActionButton(
         onPressed: _addPizza,
         tooltip: 'Increment',
@@ -49,3 +112,4 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
